@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <string>
 
 // Window variables
 const int windowWidth = 800;
@@ -9,6 +10,16 @@ Vector2 ballPosition = { (float) windowWidth / 2.0f, (float) windowHeight / 2.0f
 Vector2 ballSpeed { 5.0f, 4.0f };
 float ballRadius = 6.0f;
 
+// Opponent variables
+Rectangle opponent {windowWidth - 40.0f, (float) windowHeight / 2.0f, 10.0f, 30.0f};
+const float opponentSpeed = 3.88f;
+int opponentScore = 0;
+
+// Player variables
+Rectangle player { 30.0f, (float) windowHeight / 2.0f,  10.0f, 30.0f};
+const float playerSpeed = 5.0f;
+int playerScore = 0;
+
 // Makes the ball move and bounce off of the walls
 void MoveBall()
 {
@@ -16,18 +27,28 @@ void MoveBall()
     ballPosition.x += ballSpeed.x;
     ballPosition.y += ballSpeed.y;
 
-    // If the ball hits a vertical edge, reverse (bounce) it away
-    if (ballPosition.x >= windowWidth - ballRadius || ballPosition.x <= ballRadius)
+    // If the ball hits the edge behind the opponent, increment player score
+    // and reset the ball.
+    if (ballPosition.x >= windowWidth - ballRadius)
+    {
+        ballPosition.x = (float) windowWidth / 2.0f;
+        ballPosition.y = (float) windowHeight / 2.0f;
         ballSpeed.x *= -1.0f;
+        playerScore++;
+    }
+    // If the ball hits the edge behind the player, increment opponent score
+    // and reset the ball.
+    if (ballPosition.x <= ballRadius)
+    {
+        ballPosition.x = (float) windowWidth / 2.0f;
+        ballPosition.y = (float) windowHeight / 2.0f;
+        ballSpeed.x *= -1.0f;
+        opponentScore++;
+    }
     // If the ball hits a horizontal edge, reverse (bounce) it away
     if (ballPosition.y >= windowHeight - ballRadius || ballPosition.y <= ballRadius)
         ballSpeed.y *= -1.0f;
 }
-
-// Player variables
-Rectangle player { 30.0f, (float) windowHeight / 2.0f,  10.0f, 30.0f};
-const float playerSpeed = 5.0f;
-int playerScore = 0;
 
 // Handles player movement
 void MovePlayer()
@@ -39,11 +60,6 @@ void MovePlayer()
     else if (IsKeyDown(KEY_S) && player.y < windowHeight - player.height)
         player.y += playerSpeed;
 }
-
-// Opponent variables
-Rectangle opponent {windowWidth - 40.0f, (float) windowHeight / 2.0f, 10.0f, 30.0f};
-const float opponentSpeed = 3.6f;
-int opponentScore = 0;
 
 // Moves the opponent, tracking the y position of the ball
 void MoveOpponent()
@@ -87,6 +103,9 @@ int main()
         DrawRectangleRec(opponent, WHITE);
 
         HandleCollision();
+
+        DrawText(("Player Score: " + std::to_string(playerScore)).c_str(), 10, 10, 20, GREEN);
+        DrawText(("Opponent Score: " + std::to_string(opponentScore)).c_str(), windowWidth - 200, 10, 20, GREEN);
 
         EndDrawing();
     }
